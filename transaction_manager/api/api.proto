@@ -1,0 +1,52 @@
+syntax = "proto3";
+option go_package = "simple_warehouse/transaction_manager/api";
+
+package simple_warehouse.transaction_manager.api;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service TransactionManager {
+  rpc Insert(InsertRequest) returns (google.protobuf.Empty) {}
+  rpc GetDuring(GetDuringRequest) returns (GetDuringResponse) {}
+  rpc GetByUser(GetByUserRequest) returns (GetByUserResponse) {}
+  rpc AddUser(AddUserRequest) returns (google.protobuf.Empty) {}
+}
+
+message Transaction {
+  google.protobuf.Timestamp date = 1;
+  int32 action = 2;
+  string sku = 3;
+  string shelf_name = 4;
+  int64 quantity_on_shelf = 5;
+  string author_name = 6;
+}
+
+message InsertRequest {
+  int32 action = 1;
+  string sku = 2;
+  string shelf_name = 3;
+  int64 quantity_on_shelf = 4;
+  string author_name = 5;
+}
+
+message GetDuringRequest {
+  google.protobuf.Timestamp start_date = 1;
+  google.protobuf.Timestamp end_date = 2;
+}
+
+message GetDuringResponse {
+  repeated Transaction transactions = 1;
+}
+
+message GetByUserRequest {
+  string author_name = 1;
+}
+
+message GetByUserResponse {
+  repeated Transaction transactions = 1;
+}
+
+message AddUserRequest {
+  string user_name = 1;
+}

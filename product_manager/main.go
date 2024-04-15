@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	sv "simple_warehouse/product_manager/api"
+	"simple_warehouse/product_manager/external"
 )
 
 var (
@@ -20,7 +21,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	sv.RegisterProductManagerServer(s, &server{})
+	sv.RegisterProductManagerServer(s, &external.Server{})
 	log.Printf("BFF server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

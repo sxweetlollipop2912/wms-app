@@ -3,8 +3,11 @@ option go_package = "simple_warehouse/product_manager/api";
 
 package simple_warehouse.project_manager.api;
 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
 service ProductManager {
-  rpc Import(ImportRequest) returns (ImportResponse) {}
+  rpc Import(ImportRequest) returns (google.protobuf.Empty) {}
   rpc Export(ExportRequest) returns (ExportResponse) {}
   rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
 }
@@ -12,15 +15,10 @@ service ProductManager {
 message ImportRequest {
   string sku = 1;
   string name = 2;
-  int64 expired_date = 3;
+  google.protobuf.Timestamp expired_date = 3;
   string category = 4;
   repeated string shelf_names = 5;
   repeated int64 quantity_on_shelf = 6;
-}
-
-message ImportResponse {
-  bool ok = 1;
-  string reason = 2;
 }
 
 message ExportRequest {
@@ -30,15 +28,12 @@ message ExportRequest {
 }
 
 message ExportResponse {
-  bool ok = 1;
-  string reason = 2;
-
-  string sku = 3;
-  string name = 4;
-  repeated string shelf_names = 5;
-  repeated int64 quantity_on_shelf = 6;
-  int64 expired_date = 7;
-  string category = 8;
+  string sku = 1;
+  string name = 2;
+  repeated string shelf_names = 3;
+  repeated int64 quantity_on_shelf = 4;
+  google.protobuf.Timestamp expired_date = 5;
+  string category = 6;
 }
 
 message GetProductRequest {
@@ -46,13 +41,10 @@ message GetProductRequest {
 }
 
 message GetProductResponse {
-  bool ok = 1;
-  string reason = 2;
-
-  string sku = 3;
-  string name = 4;
-  repeated string shelf_names = 5;
-  repeated int64 quantity_on_shelf = 6;
-  int64 expired_date = 7;
-  string category = 8;
+  string sku = 1;
+  string name = 2;
+  repeated string shelf_names = 3;
+  repeated int64 quantity_on_shelf = 4;
+  google.protobuf.Timestamp expired_date = 5;
+  string category = 6;
 }

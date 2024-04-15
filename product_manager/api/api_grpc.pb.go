@@ -8,6 +8,7 @@ package api
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -22,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProductManagerClient interface {
-	Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error)
+	Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Export(ctx context.Context, in *ExportRequest, opts ...grpc.CallOption) (*ExportResponse, error)
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 }
@@ -35,8 +36,8 @@ func NewProductManagerClient(cc grpc.ClientConnInterface) ProductManagerClient {
 	return &productManagerClient{cc}
 }
 
-func (c *productManagerClient) Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error) {
-	out := new(ImportResponse)
+func (c *productManagerClient) Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/simple_warehouse.project_manager.api.ProductManager/Import", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -66,7 +67,7 @@ func (c *productManagerClient) GetProduct(ctx context.Context, in *GetProductReq
 // All implementations must embed UnimplementedProductManagerServer
 // for forward compatibility
 type ProductManagerServer interface {
-	Import(context.Context, *ImportRequest) (*ImportResponse, error)
+	Import(context.Context, *ImportRequest) (*empty.Empty, error)
 	Export(context.Context, *ExportRequest) (*ExportResponse, error)
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	mustEmbedUnimplementedProductManagerServer()
@@ -76,7 +77,7 @@ type ProductManagerServer interface {
 type UnimplementedProductManagerServer struct {
 }
 
-func (UnimplementedProductManagerServer) Import(context.Context, *ImportRequest) (*ImportResponse, error) {
+func (UnimplementedProductManagerServer) Import(context.Context, *ImportRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Import not implemented")
 }
 func (UnimplementedProductManagerServer) Export(context.Context, *ExportRequest) (*ExportResponse, error) {
