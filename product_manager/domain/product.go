@@ -5,7 +5,7 @@ import (
 )
 
 type Product struct {
-	Id          int64               `json:"id"`
+	Id          int                 `json:"id"`
 	Name        string              `json:"name"`
 	Sku         string              `json:"sku"`
 	ExpiredDate timestamp.Timestamp `json:"expired_date"`

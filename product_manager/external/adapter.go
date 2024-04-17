@@ -6,39 +6,34 @@ import (
 )
 
 func convertDomainToGetProduct(inProduct *domain.Product, inShelves []*domain.Shelf) (*api.GetProductResponse, error) {
-	var shelfNames []string
-	var quantityOnShelf []int64
+	var shelfQuantityObjs []*api.ShelfQuantity
 	for _, shelf := range inShelves {
 		if shelf.Product.Sku == inProduct.Sku {
-			shelfNames = append(shelfNames, shelf.Name)
-			quantityOnShelf = append(quantityOnShelf, shelf.Quantity)
+			shelfQuantityObjs = append(shelfQuantityObjs, &api.ShelfQuantity{
+				ShelfName: shelf.Name,
+				Quantity:  shelf.Quantity,
+			})
 		}
 	}
 	return &api.GetProductResponse{
 		Sku:             inProduct.Sku,
 		Name:            inProduct.Name,
-		ShelfNames:      shelfNames,
-		QuantityOnShelf: quantityOnShelf,
+		ShelfQuantities: shelfQuantityObjs,
 		ExpiredDate:     &inProduct.ExpiredDate,
 		Category:        inProduct.Category,
 	}, nil
 }
 
-func convertDomainToExport(inProduct *domain.Product, inShelves []*domain.Shelf) (*api.ExportResponse, error) {
-	var shelfNames []string
-	var quantityOnShelf []int64
+func convertDomainToExport(inShelves []*domain.Shelf) (*api.ExportResponse, error) {
+	var shelfQuantityObjs []*api.ShelfQuantity
 	for _, shelf := range inShelves {
-		if shelf.Product.Sku == inProduct.Sku {
-			shelfNames = append(shelfNames, shelf.Name)
-			quantityOnShelf = append(quantityOnShelf, shelf.Quantity)
-		}
+		shelfQuantityObjs = append(shelfQuantityObjs, &api.ShelfQuantity{
+			ShelfName: shelf.Name,
+			Quantity:  shelf.Quantity,
+		})
 	}
 	return &api.ExportResponse{
-		Sku:             inProduct.Sku,
-		ShelfNames:      shelfNames,
-		QuantityOnShelf: quantityOnShelf,
-		ExpiredDate:     &inProduct.ExpiredDate,
-		Category:        inProduct.Category,
+		ShelfQuantities: shelfQuantityObjs,
 	}, nil
 }
 
@@ -51,13 +46,25 @@ func convertImportToDomain(in *api.ImportRequest) (*domain.Product, []*domain.Sh
 		Category:    in.GetCategory(),
 	}
 	outShelves := make([]*domain.Shelf, 0)
-	for i, shelfName := range in.GetShelfNames() {
+	for _, shelfQuantity := range in.GetShelfQuantities() {
 		outShelves = append(outShelves, &domain.Shelf{
 			Id:       -1,
-			Name:     shelfName,
+			Name:     shelfQuantity.ShelfName,
 			Product:  &outProduct,
-			Quantity: in.GetQuantityOnShelf()[i],
+			Quantity: shelfQuantity.Quantity,
 		})
 	}
 	return &outProduct, outShelves, nil
+}
+
+func convertExportToDomain(in *api.ExportRequest) (string, []*domain.Shelf, error) {
+	outShelves := make([]*domain.Shelf, 0)
+	for _, shelfQuantity := range in.GetShelfQuantities() {
+		outShelves = append(outShelves, &domain.Shelf{
+			Id:       -1,
+			Name:     shelfQuantity.ShelfName,
+			Quantity: shelfQuantity.Quantity,
+		})
+	}
+	return in.GetSku(), outShelves, nil
 }

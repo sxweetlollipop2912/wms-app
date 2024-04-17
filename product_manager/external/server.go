@@ -7,12 +7,18 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	sv "simple_warehouse/product_manager/api"
+	"simple_warehouse/product_manager/repository"
+	"simple_warehouse/product_manager/repository/store"
 	"simple_warehouse/product_manager/use_cases"
 )
 
 type Server struct {
 	sv.UnimplementedProductManagerServer
 	uc *use_cases.UseCases
+}
+
+func NewServer(dbQuerier *store.Queries) *Server {
+	return &Server{uc: use_cases.NewUseCases(dbQuerier)}
 }
 
 func (s *Server) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Empty, error) {
@@ -28,7 +34,7 @@ func (s *Server) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Em
 
 	err = s.uc.Import(ctx, dmProduct, dmShelves)
 	if err != nil {
-		if errors.Is(err, use_cases.ErrProductAlreadyExists) {
+		if errors.Is(err, repository.ErrProductAlreadyExists) {
 			return nil, status.Error(codes.AlreadyExists, err.Error())
 		}
 		return nil, status.Error(codes.Internal, "Internal error")
@@ -43,15 +49,16 @@ func (s *Server) Export(ctx context.Context, req *sv.ExportRequest) (*sv.ExportR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	dmProduct, dmShelves, err := s.uc.Export(ctx, req.GetSku(), req.GetShelfNames(), req.GetQuantityOnShelf())
+	sku, dmShelves, err := convertExportToDomain(req)
+	dmShelves, err = s.uc.Export(ctx, sku, dmShelves)
 	if err != nil {
-		if errors.Is(err, use_cases.ErrProductNotExists) {
+		if errors.Is(err, repository.ErrProductNotExists) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
-	res, err := convertDomainToExport(dmProduct, dmShelves)
+	res, err := convertDomainToExport(dmShelves)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
@@ -67,7 +74,7 @@ func (s *Server) GetProduct(ctx context.Context, req *sv.GetProductRequest) (res
 
 	dmProduct, dmShelves, err := s.uc.GetProductBySku(ctx, req.GetSku())
 	if err != nil {
-		if errors.Is(err, use_cases.ErrProductNotExists) {
+		if errors.Is(err, repository.ErrProductNotExists) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
 		return nil, status.Error(codes.Internal, "Internal error")

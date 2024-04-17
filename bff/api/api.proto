@@ -12,30 +12,28 @@ service BFF {
   rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
 }
 
+message ShelfQuantity {
+  string shelf_name = 1;
+  int64 quantity = 2; // < 0 for all
+}
+
 message ImportRequest {
   string sku = 1;
   string name = 2;
   google.protobuf.Timestamp expired_date = 3;
   string category = 4;
-  repeated string shelf_names = 5;
-  repeated int64 quantity_on_shelf = 6;
-  int64 author_id = 7;
+  repeated ShelfQuantity shelf_quantities = 5;
+  int64 author_id = 6;
 }
 
 message ExportRequest {
   string sku = 1;
-  repeated string shelf_names = 2;
-  repeated int64 quantity_on_shelf = 3; // < 0 to export all
-  int64 author_id = 4;
+  repeated ShelfQuantity shelf_quantities = 2;
+  int64 author_id = 3;
 }
 
 message ExportResponse {
-  string sku = 1;
-  string name = 2;
-  repeated string shelf_names = 3;
-  repeated int64 quantity_on_shelf = 4;
-  google.protobuf.Timestamp expired_date = 5;
-  string category = 6;
+  repeated ShelfQuantity shelf_quantities = 1;
 }
 
 message GetProductRequest {
@@ -45,8 +43,7 @@ message GetProductRequest {
 message GetProductResponse {
   string sku = 1;
   string name = 2;
-  repeated string shelf_names = 3;
-  repeated int64 quantity_on_shelf = 4;
-  google.protobuf.Timestamp expired_date = 5;
-  string category = 6;
+  repeated ShelfQuantity shelf_quantities = 3;
+  google.protobuf.Timestamp expired_date = 4;
+  string category = 5;
 }

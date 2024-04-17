@@ -3,24 +3,19 @@ package api
 import "errors"
 
 var (
-	ErrImportNoShelfProvided            = errors.New("no shelf provided")
-	ErrImportShelvesAndQuantityMismatch = errors.New("shelves and quantity mismatch")
-	ErrImportSkuEmpty                   = errors.New("sku is empty")
-	ErrImportNameEmpty                  = errors.New("name is empty")
+	ErrImportNoShelfProvided = errors.New("no shelf provided")
+	ErrImportSkuEmpty        = errors.New("sku is empty")
+	ErrImportNameEmpty       = errors.New("name is empty")
 
-	ErrExportNoShelfProvided            = errors.New("no shelf provided")
-	ErrExportShelvesAndQuantityMismatch = errors.New("shelves and quantity mismatch")
-	ErrExportSkuEmpty                   = errors.New("sku is empty")
+	ErrExportNoShelfProvided = errors.New("no shelf provided")
+	ErrExportSkuEmpty        = errors.New("sku is empty")
 
 	ErrGetProductSkuEmpty = errors.New("sku is empty")
 )
 
 func (req *ImportRequest) Validate() error {
-	if req.GetShelfNames() == nil || len(req.GetShelfNames()) == 0 {
+	if req.GetShelfQuantities() == nil || len(req.GetShelfQuantities()) == 0 {
 		return ErrImportNoShelfProvided
-	}
-	if req.GetQuantityOnShelf() == nil || len(req.GetQuantityOnShelf()) != len(req.GetShelfNames()) {
-		return ErrImportShelvesAndQuantityMismatch
 	}
 	if req.GetSku() == "" {
 		return ErrImportSkuEmpty
@@ -32,11 +27,8 @@ func (req *ImportRequest) Validate() error {
 }
 
 func (req *ExportRequest) Validate() error {
-	if req.GetShelfNames() == nil || len(req.GetShelfNames()) == 0 {
+	if req.GetShelfQuantities() == nil || len(req.GetShelfQuantities()) == 0 {
 		return ErrExportNoShelfProvided
-	}
-	if req.GetQuantityOnShelf() == nil || len(req.GetQuantityOnShelf()) != len(req.GetShelfNames()) {
-		return ErrExportShelvesAndQuantityMismatch
 	}
 	if req.GetSku() == "" {
 		return ErrExportSkuEmpty

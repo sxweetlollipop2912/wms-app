@@ -12,27 +12,72 @@ type UseCases struct {
 	userRepository        repository.UserRepository
 }
 
-func (uc *UseCases) InsertTransaction(ctx context.Context, transaction *domain.Transaction, authorName string) error {
-	// TODO
+func NewUseCases() *UseCases {
+	return &UseCases{
+		transactionRepository: repository.NewTransactionRepository(),
+		userRepository:        repository.NewUserRepository(),
+	}
+}
+
+func (uc *UseCases) InsertTransactionInBulk(ctx context.Context, inTransactions []*domain.Transaction, inAuthor *domain.User) error {
+	dbAuthor, err := uc.userRepository.GetByName(ctx, inAuthor.Name)
+	if err != nil {
+		return err
+	}
+	for _, transaction := range inTransactions {
+		transaction.Author = dbAuthor
+		_, err := uc.transactionRepository.Create(ctx, transaction)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func (uc *UseCases) GetTransactionDuring(ctx context.Context, start, end *timestamp.Timestamp) ([]*domain.Transaction, error) {
-	// TODO
-	return []*domain.Transaction{}, nil
+func (uc *UseCases) GetTransactionDuring(ctx context.Context, start, end *timestamp.Timestamp) (outTransactions []*domain.Transaction, error error) {
+	outTransactions, error = uc.transactionRepository.GetConditional(ctx, func(transaction *domain.Transaction) bool {
+		if start != nil && transaction.Date.AsTime().Before(start.AsTime()) {
+			return false
+		}
+		if end != nil && transaction.Date.AsTime().After(end.AsTime()) {
+			return false
+		}
+		return true
+	})
+	if error != nil {
+		return nil, error
+	}
+	return outTransactions, nil
 }
 
-func (uc *UseCases) GetTransactionByUser(ctx context.Context, userName string) ([]*domain.Transaction, error) {
-	// TODO
-	return []*domain.Transaction{}, nil
+func (uc *UseCases) GetTransactionByUser(ctx context.Context, userName string) (outTransactions []*domain.Transaction, error error) {
+	dbUser, err := uc.userRepository.GetByName(ctx, userName)
+	if err != nil {
+		return nil, err
+	}
+	outTransactions, error = uc.transactionRepository.GetConditional(ctx, func(transaction *domain.Transaction) bool {
+		return transaction.Author.Id == dbUser.Id
+	})
+	if error != nil {
+		return nil, error
+	}
+	return outTransactions, nil
 }
 
-func (uc *UseCases) GetTransactionByProduct(ctx context.Context, sku string) ([]*domain.Transaction, error) {
-	// TODO
-	return []*domain.Transaction{}, nil
+func (uc *UseCases) GetTransactionByProduct(ctx context.Context, sku string) (outTransactions []*domain.Transaction, error error) {
+	outTransactions, error = uc.transactionRepository.GetConditional(ctx, func(transaction *domain.Transaction) bool {
+		return transaction.Sku == sku
+	})
+	if error != nil {
+		return nil, error
+	}
+	return outTransactions, nil
 }
 
 func (uc *UseCases) AddUser(ctx context.Context, user *domain.User) error {
-	// TODO
+	_, err := uc.userRepository.Create(ctx, user)
+	if err != nil {
+		return err
+	}
 	return nil
 }

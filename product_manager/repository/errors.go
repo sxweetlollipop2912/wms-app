@@ -1,4 +1,4 @@
-package use_cases
+package repository
 
 import "errors"
 
@@ -8,7 +8,4 @@ var (
 
 	ErrProductNotOnShelf       = errors.New("product is not on shelf")
 	ErrProductNotEnoughOnShelf = errors.New("product is not enough on shelf")
-
-	// ErrShelfProductMismatch is internal error
-	ErrShelfProductMismatch = errors.New("ErrShelfProductMismatch")
 )
