@@ -5,7 +5,7 @@ import (
 )
 
 type Transaction struct {
-	Id              int64               `json:"id"`
+	Id              int                 `json:"id"`
 	Action          int                 `json:"action"`
 	Date            timestamp.Timestamp `json:"date"`
 	Sku             string              `json:"sku"`

@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	sv "simple_warehouse/transaction_manager/api"
 	"simple_warehouse/transaction_manager/repository"
+	"simple_warehouse/transaction_manager/repository/store"
 	"simple_warehouse/transaction_manager/use_cases"
 )
 
@@ -16,8 +17,8 @@ type Server struct {
 	uc *use_cases.UseCases
 }
 
-func NewServer() *Server {
-	return &Server{uc: use_cases.NewUseCases()}
+func NewServer(dbQuerier *store.Queries) *Server {
+	return &Server{uc: use_cases.NewUseCases(dbQuerier)}
 }
 
 func (s *Server) Insert(ctx context.Context, req *sv.InsertRequest) (*emptypb.Empty, error) {
@@ -67,7 +68,7 @@ func (s *Server) GetByUser(ctx context.Context, req *sv.GetByUserRequest) (*sv.G
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	dmTransactions, err := s.uc.GetTransactionByUser(ctx, req.GetAuthorName())
+	dmTransactions, err := s.uc.GetTransactionByUserName(ctx, req.GetAuthorName())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Internal error")
 	}

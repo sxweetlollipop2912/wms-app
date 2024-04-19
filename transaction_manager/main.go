@@ -8,13 +8,13 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	"simple_warehouse/product_manager/api"
-	"simple_warehouse/product_manager/external"
-	"simple_warehouse/product_manager/repository/store"
+	"simple_warehouse/transaction_manager/api"
+	"simple_warehouse/transaction_manager/external"
+	"simple_warehouse/transaction_manager/repository/store"
 )
 
 var (
-	port = flag.Int("port", 50052, "The server port")
+	port = flag.Int("port", 50053, "The server port")
 )
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	server := grpc.NewServer()
-	api.RegisterProductManagerServer(server, external.NewServer(database))
+	api.RegisterTransactionManagerServer(server, external.NewServer(database))
 	log.Printf("BFF server listening at %v", lis.Addr())
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

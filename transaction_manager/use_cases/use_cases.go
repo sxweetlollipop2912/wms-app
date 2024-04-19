@@ -5,6 +5,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"simple_warehouse/transaction_manager/domain"
 	"simple_warehouse/transaction_manager/repository"
+	"simple_warehouse/transaction_manager/repository/store"
 )
 
 type UseCases struct {
@@ -12,20 +13,20 @@ type UseCases struct {
 	userRepository        repository.UserRepository
 }
 
-func NewUseCases() *UseCases {
+func NewUseCases(dbQuerier *store.Queries) *UseCases {
 	return &UseCases{
-		transactionRepository: repository.NewTransactionRepository(),
-		userRepository:        repository.NewUserRepository(),
+		transactionRepository: repository.NewTransactionRepository(dbQuerier),
+		userRepository:        repository.NewUserRepository(dbQuerier),
 	}
 }
 
 func (uc *UseCases) InsertTransactionInBulk(ctx context.Context, inTransactions []*domain.Transaction, inAuthor *domain.User) error {
-	dbAuthor, err := uc.userRepository.GetByName(ctx, inAuthor.Name)
+	author, err := uc.userRepository.GetById(ctx, inAuthor.Id)
 	if err != nil {
 		return err
 	}
 	for _, transaction := range inTransactions {
-		transaction.Author = dbAuthor
+		transaction.Author = author
 		_, err := uc.transactionRepository.Create(ctx, transaction)
 		if err != nil {
 			return err
@@ -35,29 +36,31 @@ func (uc *UseCases) InsertTransactionInBulk(ctx context.Context, inTransactions 
 }
 
 func (uc *UseCases) GetTransactionDuring(ctx context.Context, start, end *timestamp.Timestamp) (outTransactions []*domain.Transaction, error error) {
-	outTransactions, error = uc.transactionRepository.GetConditional(ctx, func(transaction *domain.Transaction) bool {
-		if start != nil && transaction.Date.AsTime().Before(start.AsTime()) {
-			return false
-		}
-		if end != nil && transaction.Date.AsTime().After(end.AsTime()) {
-			return false
-		}
-		return true
-	})
+	outTransactions, error = uc.transactionRepository.GetByStartAndEndDate(ctx, start, end)
 	if error != nil {
 		return nil, error
 	}
 	return outTransactions, nil
 }
 
-func (uc *UseCases) GetTransactionByUser(ctx context.Context, userName string) (outTransactions []*domain.Transaction, error error) {
-	dbUser, err := uc.userRepository.GetByName(ctx, userName)
+func (uc *UseCases) GetTransactionByUserId(ctx context.Context, userId int) (outTransactions []*domain.Transaction, error error) {
+	user, err := uc.userRepository.GetById(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
-	outTransactions, error = uc.transactionRepository.GetConditional(ctx, func(transaction *domain.Transaction) bool {
-		return transaction.Author.Id == dbUser.Id
-	})
+	outTransactions, error = uc.transactionRepository.GetByAuthorId(ctx, user.Id)
+	if error != nil {
+		return nil, error
+	}
+	return outTransactions, nil
+}
+
+func (uc *UseCases) GetTransactionByUserName(ctx context.Context, userName string) (outTransactions []*domain.Transaction, error error) {
+	user, err := uc.userRepository.GetByExactName(ctx, userName)
+	if err != nil {
+		return nil, err
+	}
+	outTransactions, error = uc.transactionRepository.GetByAuthorId(ctx, user.Id)
 	if error != nil {
 		return nil, error
 	}
@@ -65,9 +68,7 @@ func (uc *UseCases) GetTransactionByUser(ctx context.Context, userName string) (
 }
 
 func (uc *UseCases) GetTransactionByProduct(ctx context.Context, sku string) (outTransactions []*domain.Transaction, error error) {
-	outTransactions, error = uc.transactionRepository.GetConditional(ctx, func(transaction *domain.Transaction) bool {
-		return transaction.Sku == sku
-	})
+	outTransactions, error = uc.transactionRepository.GetBySku(ctx, sku)
 	if error != nil {
 		return nil, error
 	}

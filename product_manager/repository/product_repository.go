@@ -16,6 +16,7 @@ func NewProductRepository(dbQuerier *store.Queries) ProductRepository {
 type ProductRepository interface {
 	GetById(ctx context.Context, id int) (*domain.Product, error)
 	GetBySku(ctx context.Context, sku string) (*domain.Product, error)
+	FindByName(ctx context.Context, name string) ([]*domain.Product, error)
 	Create(ctx context.Context, product *domain.Product) (*domain.Product, error)
 	Update(ctx context.Context, product *domain.Product) (*domain.Product, error)
 }
@@ -46,6 +47,23 @@ func (pr *ProductRepositoryImpl) GetBySku(ctx context.Context, sku string) (*dom
 		return nil, err
 	}
 	return dmProduct, nil
+}
+
+func (pr *ProductRepositoryImpl) FindByName(ctx context.Context, name string) ([]*domain.Product, error) {
+	dbProducts, err := pr.q.FindProductByName(ctx, pgtype.Text{String: name})
+	if err != nil {
+		return nil, err
+	}
+	var dmProducts []*domain.Product
+	for _, dbProduct := range dbProducts {
+		dmProduct, err := convertDbProductToDmProduct(&dbProduct)
+		if err != nil {
+			return nil, err
+		}
+		dmProducts = append(dmProducts, dmProduct)
+	}
+	return dmProducts, nil
+
 }
 
 func (pr *ProductRepositoryImpl) Create(ctx context.Context, inProduct *domain.Product) (*domain.Product, error) {

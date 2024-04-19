@@ -12,7 +12,9 @@ import (
 )
 
 const createProduct = `-- name: CreateProduct :one
-INSERT INTO "Product" ("sku", "name", "expired_date", "category") VALUES ($1, $2, $3, $4) RETURNING id, sku, name, expired_date, category
+INSERT INTO "Product" ("sku", "name", "expired_date", "category")
+VALUES ($1, $2, $3, $4)
+RETURNING id, sku, name, expired_date, category
 `
 
 type CreateProductParams struct {
@@ -41,7 +43,9 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 }
 
 const createShelf = `-- name: CreateShelf :one
-INSERT INTO "Shelf" ("name", "product_id", "quantity") VALUES ($1, $2, $3) RETURNING id, name, product_id, quantity
+INSERT INTO "Shelf" ("name", "product_id", "quantity")
+VALUES ($1, $2, $3)
+RETURNING id, name, product_id, quantity
 `
 
 type CreateShelfParams struct {
@@ -63,7 +67,10 @@ func (q *Queries) CreateShelf(ctx context.Context, arg CreateShelfParams) (Shelf
 }
 
 const deleteShelfById = `-- name: DeleteShelfById :one
-DELETE FROM "Shelf" WHERE "id" = $1 RETURNING id, name, product_id, quantity
+DELETE
+FROM "Shelf"
+WHERE "id" = $1
+RETURNING id, name, product_id, quantity
 `
 
 func (q *Queries) DeleteShelfById(ctx context.Context, id int32) (Shelf, error) {
@@ -78,8 +85,42 @@ func (q *Queries) DeleteShelfById(ctx context.Context, id int32) (Shelf, error) 
 	return i, err
 }
 
+const findProductByName = `-- name: FindProductByName :many
+SELECT id, sku, name, expired_date, category
+FROM "Product"
+WHERE "name" ILIKE '%' || $1 || '%'
+`
+
+func (q *Queries) FindProductByName(ctx context.Context, dollar_1 pgtype.Text) ([]Product, error) {
+	rows, err := q.db.Query(ctx, findProductByName, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Product{}
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sku,
+			&i.Name,
+			&i.ExpiredDate,
+			&i.Category,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProductByCategory = `-- name: GetProductByCategory :many
-SELECT id, sku, name, expired_date, category FROM "Product" WHERE "category" = $1
+SELECT id, sku, name, expired_date, category
+FROM "Product"
+WHERE "category" = $1
 `
 
 func (q *Queries) GetProductByCategory(ctx context.Context, category pgtype.Text) ([]Product, error) {
@@ -110,7 +151,10 @@ func (q *Queries) GetProductByCategory(ctx context.Context, category pgtype.Text
 
 const getProductById = `-- name: GetProductById :one
 
-SELECT id, sku, name, expired_date, category FROM "Product" WHERE "id" = $1 LIMIT 1
+SELECT id, sku, name, expired_date, category
+FROM "Product"
+WHERE "id" = $1
+LIMIT 1
 `
 
 // -----------------------------------------------
@@ -129,38 +173,11 @@ func (q *Queries) GetProductById(ctx context.Context, id int32) (Product, error)
 	return i, err
 }
 
-const getProductByName = `-- name: GetProductByName :many
-SELECT id, sku, name, expired_date, category FROM "Product" WHERE "name" = $1
-`
-
-func (q *Queries) GetProductByName(ctx context.Context, name string) ([]Product, error) {
-	rows, err := q.db.Query(ctx, getProductByName, name)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Product{}
-	for rows.Next() {
-		var i Product
-		if err := rows.Scan(
-			&i.ID,
-			&i.Sku,
-			&i.Name,
-			&i.ExpiredDate,
-			&i.Category,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getProductBySku = `-- name: GetProductBySku :one
-SELECT id, sku, name, expired_date, category FROM "Product" WHERE "sku" = $1 LIMIT 1
+SELECT id, sku, name, expired_date, category
+FROM "Product"
+WHERE "sku" = $1
+LIMIT 1
 `
 
 func (q *Queries) GetProductBySku(ctx context.Context, sku string) (Product, error) {
@@ -177,7 +194,9 @@ func (q *Queries) GetProductBySku(ctx context.Context, sku string) (Product, err
 }
 
 const getProductExpired = `-- name: GetProductExpired :many
-SELECT id, sku, name, expired_date, category FROM "Product" WHERE "expired_date" < $1
+SELECT id, sku, name, expired_date, category
+FROM "Product"
+WHERE "expired_date" < $1
 `
 
 func (q *Queries) GetProductExpired(ctx context.Context, expiredDate pgtype.Timestamp) ([]Product, error) {
@@ -207,7 +226,9 @@ func (q *Queries) GetProductExpired(ctx context.Context, expiredDate pgtype.Time
 }
 
 const getProductNotExpired = `-- name: GetProductNotExpired :many
-SELECT id, sku, name, expired_date, category FROM "Product" WHERE "expired_date" >= $1
+SELECT id, sku, name, expired_date, category
+FROM "Product"
+WHERE "expired_date" >= $1
 `
 
 func (q *Queries) GetProductNotExpired(ctx context.Context, expiredDate pgtype.Timestamp) ([]Product, error) {
@@ -238,7 +259,10 @@ func (q *Queries) GetProductNotExpired(ctx context.Context, expiredDate pgtype.T
 
 const getShelfById = `-- name: GetShelfById :one
 
-SELECT id, name, product_id, quantity FROM "Shelf" WHERE "id" = $1 LIMIT 1
+SELECT id, name, product_id, quantity
+FROM "Shelf"
+WHERE "id" = $1
+LIMIT 1
 `
 
 // -----------------------------------------------
@@ -257,7 +281,9 @@ func (q *Queries) GetShelfById(ctx context.Context, id int32) (Shelf, error) {
 }
 
 const getShelfByProductId = `-- name: GetShelfByProductId :many
-SELECT id, name, product_id, quantity FROM "Shelf" WHERE "product_id" = $1
+SELECT id, name, product_id, quantity
+FROM "Shelf"
+WHERE "product_id" = $1
 `
 
 func (q *Queries) GetShelfByProductId(ctx context.Context, productID int32) ([]Shelf, error) {
@@ -286,7 +312,9 @@ func (q *Queries) GetShelfByProductId(ctx context.Context, productID int32) ([]S
 }
 
 const getShelfBySku = `-- name: GetShelfBySku :many
-SELECT id, name, product_id, quantity FROM "Shelf" WHERE "product_id" = (SELECT "id" FROM "Product" WHERE "sku" = $1 LIMIT 1)
+SELECT id, name, product_id, quantity
+FROM "Shelf"
+WHERE "product_id" = (SELECT "id" FROM "Product" WHERE "sku" = $1 LIMIT 1)
 `
 
 func (q *Queries) GetShelfBySku(ctx context.Context, sku string) ([]Shelf, error) {
@@ -315,7 +343,11 @@ func (q *Queries) GetShelfBySku(ctx context.Context, sku string) ([]Shelf, error
 }
 
 const getShelfBySkuAndName = `-- name: GetShelfBySkuAndName :one
-SELECT id, name, product_id, quantity FROM "Shelf" AS "s" WHERE s.product_id = (SELECT "id" FROM "Product" WHERE "sku" = $1 LIMIT 1) AND s.name = $2 LIMIT 1
+SELECT id, name, product_id, quantity
+FROM "Shelf" AS "s"
+WHERE s.product_id = (SELECT "id" FROM "Product" WHERE "sku" = $1 LIMIT 1)
+  AND s.name = $2
+LIMIT 1
 `
 
 type GetShelfBySkuAndNameParams struct {
@@ -336,7 +368,13 @@ func (q *Queries) GetShelfBySkuAndName(ctx context.Context, arg GetShelfBySkuAnd
 }
 
 const updateProduct = `-- name: UpdateProduct :one
-UPDATE "Product" SET "sku" = $1, "name" = $2, "expired_date" = $3, "category" = $4 WHERE "id" = $5 RETURNING id, sku, name, expired_date, category
+UPDATE "Product"
+SET "sku"          = $1,
+    "name"         = $2,
+    "expired_date" = $3,
+    "category"     = $4
+WHERE "id" = $5
+RETURNING id, sku, name, expired_date, category
 `
 
 type UpdateProductParams struct {
@@ -367,7 +405,12 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 }
 
 const updateShelf = `-- name: UpdateShelf :one
-UPDATE "Shelf" SET "name" = $1, "product_id" = $2, "quantity" = $3 WHERE "id" = $4 RETURNING id, name, product_id, quantity
+UPDATE "Shelf"
+SET "name"       = $1,
+    "product_id" = $2,
+    "quantity"   = $3
+WHERE "id" = $4
+RETURNING id, name, product_id, quantity
 `
 
 type UpdateShelfParams struct {

@@ -14,12 +14,12 @@ type Querier interface {
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateShelf(ctx context.Context, arg CreateShelfParams) (Shelf, error)
 	DeleteShelfById(ctx context.Context, id int32) (Shelf, error)
+	FindProductByName(ctx context.Context, dollar_1 pgtype.Text) ([]Product, error)
 	GetProductByCategory(ctx context.Context, category pgtype.Text) ([]Product, error)
 	//-----------------------------------------------
 	// PRODUCT TABLE
 	//-----------------------------------------------
 	GetProductById(ctx context.Context, id int32) (Product, error)
-	GetProductByName(ctx context.Context, name string) ([]Product, error)
 	GetProductBySku(ctx context.Context, sku string) (Product, error)
 	GetProductExpired(ctx context.Context, expiredDate pgtype.Timestamp) ([]Product, error)
 	GetProductNotExpired(ctx context.Context, expiredDate pgtype.Timestamp) ([]Product, error)

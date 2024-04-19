@@ -17,14 +17,16 @@ func (req *InsertRequest) Validate() error {
 	if req.GetSku() == "" {
 		return ErrInsertSkuMissing
 	}
-	if req.GetShelfName() == "" {
-		return ErrInsertShelfNameMissing
-	}
-	if req.GetQuantityOnShelf() <= 0 {
-		return ErrInsertQuantityInvalid
-	}
 	if req.GetAuthorName() == "" {
 		return ErrInsertAuthorNameMissing
+	}
+	for _, shelfQuantity := range req.GetShelfQuantities() {
+		if shelfQuantity.GetShelfName() == "" {
+			return ErrInsertShelfNameMissing
+		}
+		if shelfQuantity.GetQuantity() <= 0 {
+			return ErrInsertQuantityInvalid
+		}
 	}
 	return nil
 }

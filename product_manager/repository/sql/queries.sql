@@ -14,10 +14,10 @@ FROM "Product"
 WHERE "sku" = $1
 LIMIT 1;
 
--- name: GetProductByName :many
+-- name: FindProductByName :many
 SELECT *
 FROM "Product"
-WHERE "name" = $1;
+WHERE "name" ILIKE '%' || $1 || '%';
 
 -- name: GetProductByCategory :many
 SELECT *
