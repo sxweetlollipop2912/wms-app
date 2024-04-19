@@ -3,6 +3,7 @@ option go_package = "simple_warehouse/bff/api";
 
 package simple_warehouse.bff.api;
 
+import "validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
@@ -13,23 +14,23 @@ service BFF {
 }
 
 message ShelfQuantity {
-  string shelf_name = 1;
+  string shelf_name = 1 [(validate.rules).string.min_len = 1];
   int64 quantity = 2; // < 0 for all
 }
 
 message ImportRequest {
-  string sku = 1;
-  string name = 2;
+  string sku = 1 [(validate.rules).string.min_len = 1];
+  string name = 2 [(validate.rules).string.min_len = 1];
   google.protobuf.Timestamp expired_date = 3;
   string category = 4;
-  repeated ShelfQuantity shelf_quantities = 5;
-  int64 author_id = 6;
+  repeated ShelfQuantity shelf_quantities = 5 [(validate.rules).repeated.min_items = 1];
+  string author_name = 6 [(validate.rules).string.min_len = 1];
 }
 
 message ExportRequest {
-  string sku = 1;
-  repeated ShelfQuantity shelf_quantities = 2;
-  int64 author_id = 3;
+  string sku = 1 [(validate.rules).string.min_len = 1];
+  repeated ShelfQuantity shelf_quantities = 2 [(validate.rules).repeated.min_items = 1];
+  string author_name = 3 [(validate.rules).string.min_len = 1];
 }
 
 message ExportResponse {
@@ -37,7 +38,7 @@ message ExportResponse {
 }
 
 message GetProductRequest {
-  string sku = 1;
+  string sku = 1 [(validate.rules).string.min_len = 1];
 }
 
 message GetProductResponse {

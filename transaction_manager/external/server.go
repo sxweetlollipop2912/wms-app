@@ -27,11 +27,7 @@ func (s *Server) Insert(ctx context.Context, req *sv.InsertRequest) (*emptypb.Em
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	dmTransactions, dmAuthor, err := convertInsertToDomain(req)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
+	dmTransactions, dmAuthor := convertInsertToDomain(req)
 	err = s.uc.InsertTransactionInBulk(ctx, dmTransactions, dmAuthor)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotExists) {
@@ -54,11 +50,7 @@ func (s *Server) GetDuring(ctx context.Context, req *sv.GetDuringRequest) (*sv.G
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
-	res, err := convertDomainToGetDuring(dmTransactions)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
+	res := convertDomainToGetDuring(dmTransactions)
 	return res, nil
 }
 
@@ -73,11 +65,7 @@ func (s *Server) GetByUser(ctx context.Context, req *sv.GetByUserRequest) (*sv.G
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
-	res, err := convertDomainToGetByUser(dmTransactions)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
+	res := convertDomainToGetByUser(dmTransactions)
 	return res, nil
 }
 
@@ -87,11 +75,7 @@ func (s *Server) AddUser(ctx context.Context, req *sv.AddUserRequest) (*emptypb.
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	dmUser, err := convertAddUserToDomain(req)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
+	dmUser := convertAddUserToDomain(req)
 	err = s.uc.AddUser(ctx, dmUser)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Internal error")

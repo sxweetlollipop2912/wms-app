@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	sv "simple_warehouse/bff/api"
+	"simple_warehouse/bff/external"
 	cli "simple_warehouse/product_manager/api"
 	"time"
 )
@@ -51,7 +52,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	sv.RegisterBFFServer(s, &serverT{client: client})
+	sv.RegisterBFFServer(s, &external.serverT{client: client})
 	log.Printf("BFF server_t listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

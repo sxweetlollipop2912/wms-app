@@ -5,7 +5,7 @@ import (
 	"simple_warehouse/transaction_manager/domain"
 )
 
-func convertInsertToDomain(req *sv.InsertRequest) (dmTransaction []*domain.Transaction, dmAuthor *domain.User, error error) {
+func convertInsertToDomain(req *sv.InsertRequest) (dmTransaction []*domain.Transaction, dmAuthor *domain.User) {
 	dmTransaction = make([]*domain.Transaction, 0)
 	for _, shelfQuantity := range req.ShelfQuantities {
 		dmTransaction = append(dmTransaction, &domain.Transaction{
@@ -21,17 +21,17 @@ func convertInsertToDomain(req *sv.InsertRequest) (dmTransaction []*domain.Trans
 		Name: req.GetAuthorName(),
 	}
 
-	return dmTransaction, dmAuthor, nil
+	return dmTransaction, dmAuthor
 }
 
-func convertAddUserToDomain(req *sv.AddUserRequest) (*domain.User, error) {
+func convertAddUserToDomain(req *sv.AddUserRequest) *domain.User {
 	return &domain.User{
 		Id:   -1,
 		Name: req.GetUserName(),
-	}, nil
+	}
 }
 
-func convertDomainToGetDuring(dmTransaction []*domain.Transaction) (*sv.GetDuringResponse, error) {
+func convertDomainToGetDuring(dmTransaction []*domain.Transaction) *sv.GetDuringResponse {
 	var transactions []*sv.Transaction
 	for _, t := range dmTransaction {
 		transactions = append(transactions, &sv.Transaction{
@@ -49,10 +49,10 @@ func convertDomainToGetDuring(dmTransaction []*domain.Transaction) (*sv.GetDurin
 	}
 	return &sv.GetDuringResponse{
 		Transactions: transactions,
-	}, nil
+	}
 }
 
-func convertDomainToGetByUser(dmTransaction []*domain.Transaction) (*sv.GetByUserResponse, error) {
+func convertDomainToGetByUser(dmTransaction []*domain.Transaction) *sv.GetByUserResponse {
 	var transactions []*sv.Transaction
 	for _, t := range dmTransaction {
 		transactions = append(transactions, &sv.Transaction{
@@ -70,5 +70,5 @@ func convertDomainToGetByUser(dmTransaction []*domain.Transaction) (*sv.GetByUse
 	}
 	return &sv.GetByUserResponse{
 		Transactions: transactions,
-	}, nil
+	}
 }

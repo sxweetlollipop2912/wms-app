@@ -27,10 +27,7 @@ func (s *Server) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Em
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	dmProduct, dmShelves, err := convertImportToDomain(req)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
+	dmProduct, dmShelves := convertImportToDomain(req)
 
 	err = s.uc.Import(ctx, dmProduct, dmShelves)
 	if err != nil {
@@ -49,7 +46,7 @@ func (s *Server) Export(ctx context.Context, req *sv.ExportRequest) (*sv.ExportR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	sku, dmShelves, err := convertExportToDomain(req)
+	sku, dmShelves := convertExportToDomain(req)
 	dmShelves, err = s.uc.Export(ctx, sku, dmShelves)
 	if err != nil {
 		if errors.Is(err, repository.ErrProductNotExists) {
@@ -58,11 +55,7 @@ func (s *Server) Export(ctx context.Context, req *sv.ExportRequest) (*sv.ExportR
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
-	res, err := convertDomainToExport(dmShelves)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
+	res := convertDomainToExport(dmShelves)
 	return res, nil
 }
 
@@ -80,10 +73,6 @@ func (s *Server) GetProduct(ctx context.Context, req *sv.GetProductRequest) (res
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
-	res, err := convertDomainToGetProduct(dmProduct, dmShelves)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
+	res := convertDomainToGetProduct(dmProduct, dmShelves)
 	return res, nil
 }

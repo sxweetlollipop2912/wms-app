@@ -5,7 +5,7 @@ import (
 	"simple_warehouse/product_manager/domain"
 )
 
-func convertDomainToGetProduct(inProduct *domain.Product, inShelves []*domain.Shelf) (*api.GetProductResponse, error) {
+func convertDomainToGetProduct(inProduct *domain.Product, inShelves []*domain.Shelf) *api.GetProductResponse {
 	var shelfQuantityObjs []*api.ShelfQuantity
 	for _, shelf := range inShelves {
 		if shelf.Product.Sku == inProduct.Sku {
@@ -21,10 +21,10 @@ func convertDomainToGetProduct(inProduct *domain.Product, inShelves []*domain.Sh
 		ShelfQuantities: shelfQuantityObjs,
 		ExpiredDate:     &inProduct.ExpiredDate,
 		Category:        inProduct.Category,
-	}, nil
+	}
 }
 
-func convertDomainToExport(inShelves []*domain.Shelf) (*api.ExportResponse, error) {
+func convertDomainToExport(inShelves []*domain.Shelf) *api.ExportResponse {
 	var shelfQuantityObjs []*api.ShelfQuantity
 	for _, shelf := range inShelves {
 		shelfQuantityObjs = append(shelfQuantityObjs, &api.ShelfQuantity{
@@ -34,10 +34,10 @@ func convertDomainToExport(inShelves []*domain.Shelf) (*api.ExportResponse, erro
 	}
 	return &api.ExportResponse{
 		ShelfQuantities: shelfQuantityObjs,
-	}, nil
+	}
 }
 
-func convertImportToDomain(in *api.ImportRequest) (*domain.Product, []*domain.Shelf, error) {
+func convertImportToDomain(in *api.ImportRequest) (*domain.Product, []*domain.Shelf) {
 	outProduct := domain.Product{
 		Id:          -1,
 		Sku:         in.GetSku(),
@@ -54,10 +54,10 @@ func convertImportToDomain(in *api.ImportRequest) (*domain.Product, []*domain.Sh
 			Quantity: shelfQuantity.Quantity,
 		})
 	}
-	return &outProduct, outShelves, nil
+	return &outProduct, outShelves
 }
 
-func convertExportToDomain(in *api.ExportRequest) (string, []*domain.Shelf, error) {
+func convertExportToDomain(in *api.ExportRequest) (string, []*domain.Shelf) {
 	outShelves := make([]*domain.Shelf, 0)
 	for _, shelfQuantity := range in.GetShelfQuantities() {
 		outShelves = append(outShelves, &domain.Shelf{
@@ -66,5 +66,5 @@ func convertExportToDomain(in *api.ExportRequest) (string, []*domain.Shelf, erro
 			Quantity: shelfQuantity.Quantity,
 		})
 	}
-	return in.GetSku(), outShelves, nil
+	return in.GetSku(), outShelves
 }
