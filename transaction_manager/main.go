@@ -4,9 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/google/martian/log"
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
-	"log"
 	"net"
 	"simple_warehouse/transaction_manager/api"
 	"simple_warehouse/transaction_manager/external"
@@ -18,11 +18,14 @@ var (
 )
 
 func main() {
+	log.SetLevel(log.Info)
+
 	// Initialize database
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, "user=wms password=wms host=127.0.0.1 dbname=wms")
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v", err)
+		log.Errorf("Unable to connect to database: %v", err)
+		panic(err)
 	}
 	defer conn.Close(ctx)
 	database := store.New(conn)
@@ -31,12 +34,14 @@ func main() {
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Errorf("failed to listen: %v", err)
+		panic(err)
 	}
 	server := grpc.NewServer()
 	api.RegisterTransactionManagerServer(server, external.NewServer(database))
-	log.Printf("BFF server listening at %v", lis.Addr())
+	log.Infof("TM server listening at %v", lis.Addr())
 	if err := server.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Errorf("failed to serve: %v", err)
+		panic(err)
 	}
 }

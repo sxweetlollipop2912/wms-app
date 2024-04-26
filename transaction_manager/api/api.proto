@@ -21,7 +21,7 @@ message ShelfQuantity {
 
 message Transaction {
   google.protobuf.Timestamp date = 1;
-  int32 action = 2;
+  int32 action = 2 [(validate.rules).int32 = {in: [0, 1, 2]}];
   string sku = 3 [(validate.rules).string.min_len = 1];
   repeated ShelfQuantity shelf_quantities = 4 [(validate.rules).repeated.min_items = 1];
   string author_name = 5 [(validate.rules).string.min_len = 1];

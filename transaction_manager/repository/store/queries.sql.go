@@ -12,7 +12,9 @@ import (
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO "Transaction" ("action", "sku", "shelf_name", "quantity", "author_id") VALUES ($1, $2, $3, $4, $5) RETURNING id, action, date, sku, shelf_name, quantity, author_id
+INSERT INTO "Transaction" ("action", "sku", "shelf_name", "quantity", "author_id")
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, action, date, sku, shelf_name, quantity, author_id
 `
 
 type CreateTransactionParams struct {
@@ -45,7 +47,9 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO "User" ("name") VALUES ($1) RETURNING id, name
+INSERT INTO "User" ("name")
+VALUES ($1)
+RETURNING id, name
 `
 
 func (q *Queries) CreateUser(ctx context.Context, name string) (User, error) {
@@ -56,7 +60,9 @@ func (q *Queries) CreateUser(ctx context.Context, name string) (User, error) {
 }
 
 const findUserByName = `-- name: FindUserByName :many
-SELECT id, name FROM "User" WHERE "name" ILIKE '%' || $1 || '%'
+SELECT id, name
+FROM "User"
+WHERE "name" ILIKE '%' || $1 || '%'
 `
 
 func (q *Queries) FindUserByName(ctx context.Context, dollar_1 pgtype.Text) ([]User, error) {
@@ -81,7 +87,9 @@ func (q *Queries) FindUserByName(ctx context.Context, dollar_1 pgtype.Text) ([]U
 
 const getTransactionById = `-- name: GetTransactionById :one
 
-SELECT id, action, date, sku, shelf_name, quantity, author_id FROM "Transaction" WHERE "id" = $1
+SELECT id, action, date, sku, shelf_name, quantity, author_id
+FROM "Transaction"
+WHERE "id" = $1
 `
 
 // -----------------------------------------------
@@ -103,7 +111,9 @@ func (q *Queries) GetTransactionById(ctx context.Context, id int32) (Transaction
 }
 
 const getTransactionsByAuthorId = `-- name: GetTransactionsByAuthorId :many
-SELECT id, action, date, sku, shelf_name, quantity, author_id FROM "Transaction" WHERE "author_id" = $1
+SELECT id, action, date, sku, shelf_name, quantity, author_id
+FROM "Transaction"
+WHERE "author_id" = $1
 `
 
 func (q *Queries) GetTransactionsByAuthorId(ctx context.Context, authorID int32) ([]Transaction, error) {
@@ -135,7 +145,9 @@ func (q *Queries) GetTransactionsByAuthorId(ctx context.Context, authorID int32)
 }
 
 const getTransactionsByAuthorName = `-- name: GetTransactionsByAuthorName :many
-SELECT id, action, date, sku, shelf_name, quantity, author_id FROM "Transaction" WHERE "author_id" = (SELECT "id" FROM "User" WHERE "name" = $1)
+SELECT id, action, date, sku, shelf_name, quantity, author_id
+FROM "Transaction"
+WHERE "author_id" = (SELECT "id" FROM "User" WHERE "name" = $1)
 `
 
 func (q *Queries) GetTransactionsByAuthorName(ctx context.Context, name string) ([]Transaction, error) {
@@ -167,7 +179,9 @@ func (q *Queries) GetTransactionsByAuthorName(ctx context.Context, name string) 
 }
 
 const getTransactionsBySku = `-- name: GetTransactionsBySku :many
-SELECT id, action, date, sku, shelf_name, quantity, author_id FROM "Transaction" WHERE "sku" = $1
+SELECT id, action, date, sku, shelf_name, quantity, author_id
+FROM "Transaction"
+WHERE "sku" = $1
 `
 
 func (q *Queries) GetTransactionsBySku(ctx context.Context, sku string) ([]Transaction, error) {
@@ -199,7 +213,10 @@ func (q *Queries) GetTransactionsBySku(ctx context.Context, sku string) ([]Trans
 }
 
 const getTransactionsByStartAndEndDate = `-- name: GetTransactionsByStartAndEndDate :many
-SELECT id, action, date, sku, shelf_name, quantity, author_id FROM "Transaction" WHERE ("date" >= $1 OR $1 IS NULL) AND ("date" <= $2 OR $2 IS NULL)
+SELECT id, action, date, sku, shelf_name, quantity, author_id
+FROM "Transaction"
+WHERE ("date" >= $1 OR $1 IS NULL)
+  AND ("date" <= $2 OR $2 IS NULL)
 `
 
 type GetTransactionsByStartAndEndDateParams struct {
@@ -236,7 +253,9 @@ func (q *Queries) GetTransactionsByStartAndEndDate(ctx context.Context, arg GetT
 }
 
 const getUserByExactName = `-- name: GetUserByExactName :one
-SELECT id, name FROM "User" WHERE "name" = $1
+SELECT id, name
+FROM "User"
+WHERE "name" = $1
 `
 
 func (q *Queries) GetUserByExactName(ctx context.Context, name string) (User, error) {
@@ -248,7 +267,9 @@ func (q *Queries) GetUserByExactName(ctx context.Context, name string) (User, er
 
 const getUserById = `-- name: GetUserById :one
 
-SELECT id, name FROM "User" WHERE "id" = $1
+SELECT id, name
+FROM "User"
+WHERE "id" = $1
 `
 
 // -----------------------------------------------

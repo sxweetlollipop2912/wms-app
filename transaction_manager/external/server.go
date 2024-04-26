@@ -3,6 +3,7 @@ package external
 import (
 	"context"
 	"errors"
+	"github.com/google/martian/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -22,6 +23,8 @@ func NewServer(dbQuerier *store.Queries) *Server {
 }
 
 func (s *Server) Insert(ctx context.Context, req *sv.InsertRequest) (*emptypb.Empty, error) {
+	log.Infof("[Server] Insert request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -33,6 +36,12 @@ func (s *Server) Insert(ctx context.Context, req *sv.InsertRequest) (*emptypb.Em
 		if errors.Is(err, repository.ErrUserNotExists) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
+		if errors.Is(err, repository.ErrTransactionAlreadyExists) {
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		}
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
@@ -40,6 +49,8 @@ func (s *Server) Insert(ctx context.Context, req *sv.InsertRequest) (*emptypb.Em
 }
 
 func (s *Server) GetDuring(ctx context.Context, req *sv.GetDuringRequest) (*sv.GetDuringResponse, error) {
+	log.Infof("[Server] GetDuring request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -47,6 +58,9 @@ func (s *Server) GetDuring(ctx context.Context, req *sv.GetDuringRequest) (*sv.G
 
 	dmTransactions, err := s.uc.GetTransactionDuring(ctx, req.GetStartDate(), req.GetEndDate())
 	if err != nil {
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
@@ -55,6 +69,8 @@ func (s *Server) GetDuring(ctx context.Context, req *sv.GetDuringRequest) (*sv.G
 }
 
 func (s *Server) GetByUser(ctx context.Context, req *sv.GetByUserRequest) (*sv.GetByUserResponse, error) {
+	log.Infof("[Server] GetByUser request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -62,6 +78,9 @@ func (s *Server) GetByUser(ctx context.Context, req *sv.GetByUserRequest) (*sv.G
 
 	dmTransactions, err := s.uc.GetTransactionByUserName(ctx, req.GetAuthorName())
 	if err != nil {
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
@@ -70,6 +89,8 @@ func (s *Server) GetByUser(ctx context.Context, req *sv.GetByUserRequest) (*sv.G
 }
 
 func (s *Server) AddUser(ctx context.Context, req *sv.AddUserRequest) (*emptypb.Empty, error) {
+	log.Infof("[Server] AddUser request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -78,6 +99,12 @@ func (s *Server) AddUser(ctx context.Context, req *sv.AddUserRequest) (*emptypb.
 	dmUser := convertAddUserToDomain(req)
 	err = s.uc.AddUser(ctx, dmUser)
 	if err != nil {
+		if errors.Is(err, repository.ErrUserAlreadyExists) {
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		}
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 

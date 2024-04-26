@@ -19,22 +19,3 @@ const (
 	ExportAction  int = iota
 	DiscardAction int = iota
 )
-
-func (t *Transaction) Validate() error {
-	if t.Sku == "" {
-		return ErrTransactionSkuNotMissing
-	}
-	if t.ShelfName == "" {
-		return ErrTransactionShelfNameMissing
-	}
-	if t.QuantityOnShelf <= 0 {
-		return ErrTransactionQuantityOnShelfInvalid
-	}
-	if t.Author == nil {
-		return ErrTransactionAuthorNotExists
-	}
-	if t.Action < ImportAction || t.Action > DiscardAction {
-		return ErrTransactionActionInvalid
-	}
-	return nil
-}

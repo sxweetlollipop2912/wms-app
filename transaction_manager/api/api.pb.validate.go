@@ -199,7 +199,16 @@ func (m *Transaction) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for Action
+	if _, ok := _Transaction_Action_InLookup[m.GetAction()]; !ok {
+		err := TransactionValidationError{
+			field:  "Action",
+			reason: "value must be in list [0 1 2]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if utf8.RuneCountInString(m.GetSku()) < 1 {
 		err := TransactionValidationError{
@@ -344,6 +353,12 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = TransactionValidationError{}
+
+var _Transaction_Action_InLookup = map[int32]struct{}{
+	0: {},
+	1: {},
+	2: {},
+}
 
 // Validate checks the field values on InsertRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first

@@ -21,7 +21,7 @@ func NewUseCases(dbQuerier *store.Queries) *UseCases {
 }
 
 func (uc *UseCases) InsertTransactionInBulk(ctx context.Context, inTransactions []*domain.Transaction, inAuthor *domain.User) error {
-	author, err := uc.userRepository.GetById(ctx, inAuthor.Id)
+	author, err := uc.userRepository.GetByExactName(ctx, inAuthor.Name)
 	if err != nil {
 		return err
 	}

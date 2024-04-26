@@ -21,8 +21,6 @@ type Querier interface {
 	//-----------------------------------------------
 	GetProductById(ctx context.Context, id int32) (Product, error)
 	GetProductBySku(ctx context.Context, sku string) (Product, error)
-	GetProductExpired(ctx context.Context, expiredDate pgtype.Timestamp) ([]Product, error)
-	GetProductNotExpired(ctx context.Context, expiredDate pgtype.Timestamp) ([]Product, error)
 	//-----------------------------------------------
 	// SHELF TABLE
 	//-----------------------------------------------

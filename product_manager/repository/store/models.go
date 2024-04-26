@@ -9,11 +9,10 @@ import (
 )
 
 type Product struct {
-	ID          int32            `json:"id"`
-	Sku         string           `json:"sku"`
-	Name        string           `json:"name"`
-	ExpiredDate pgtype.Timestamp `json:"expired_date"`
-	Category    pgtype.Text      `json:"category"`
+	ID       int32       `json:"id"`
+	Sku      string      `json:"sku"`
+	Name     string      `json:"name"`
+	Category pgtype.Text `json:"category"`
 }
 
 type Shelf struct {

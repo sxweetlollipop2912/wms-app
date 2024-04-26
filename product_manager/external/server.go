@@ -3,6 +3,7 @@ package external
 import (
 	"context"
 	"errors"
+	"github.com/google/martian/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -22,6 +23,8 @@ func NewServer(dbQuerier *store.Queries) *Server {
 }
 
 func (s *Server) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Empty, error) {
+	log.Infof("[Server] Import request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -34,6 +37,9 @@ func (s *Server) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Em
 		if errors.Is(err, repository.ErrProductAlreadyExists) {
 			return nil, status.Error(codes.AlreadyExists, err.Error())
 		}
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
@@ -41,6 +47,8 @@ func (s *Server) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Em
 }
 
 func (s *Server) Export(ctx context.Context, req *sv.ExportRequest) (*sv.ExportResponse, error) {
+	log.Infof("[Server] Export request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -52,6 +60,9 @@ func (s *Server) Export(ctx context.Context, req *sv.ExportRequest) (*sv.ExportR
 		if errors.Is(err, repository.ErrProductNotExists) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
@@ -60,6 +71,8 @@ func (s *Server) Export(ctx context.Context, req *sv.ExportRequest) (*sv.ExportR
 }
 
 func (s *Server) GetProduct(ctx context.Context, req *sv.GetProductRequest) (response *sv.GetProductResponse, errorResponse error) {
+	log.Infof("[Server] GetProduct request: %v", req)
+
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -69,6 +82,9 @@ func (s *Server) GetProduct(ctx context.Context, req *sv.GetProductRequest) (res
 	if err != nil {
 		if errors.Is(err, repository.ErrProductNotExists) {
 			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		if errors.Is(err, repository.ErrFieldViolation) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		return nil, status.Error(codes.Internal, "Internal error")
 	}

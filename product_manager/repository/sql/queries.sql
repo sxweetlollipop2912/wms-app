@@ -24,28 +24,17 @@ SELECT *
 FROM "Product"
 WHERE "category" = $1;
 
--- name: GetProductExpired :many
-SELECT *
-FROM "Product"
-WHERE "expired_date" < $1;
-
--- name: GetProductNotExpired :many
-SELECT *
-FROM "Product"
-WHERE "expired_date" >= $1;
-
 -- name: CreateProduct :one
-INSERT INTO "Product" ("sku", "name", "expired_date", "category")
-VALUES ($1, $2, $3, $4)
+INSERT INTO "Product" ("sku", "name", "category")
+VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: UpdateProduct :one
 UPDATE "Product"
-SET "sku"          = $1,
-    "name"         = $2,
-    "expired_date" = $3,
-    "category"     = $4
-WHERE "id" = $5
+SET "sku"      = $1,
+    "name"     = $2,
+    "category" = $3
+WHERE "id" = $4
 RETURNING *;
 
 -------------------------------------------------

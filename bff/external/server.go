@@ -2,6 +2,7 @@ package external
 
 import (
 	"context"
+	"github.com/google/martian/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -10,59 +11,75 @@ import (
 	tm "simple_warehouse/transaction_manager/api"
 )
 
-type serverT struct {
+type ServerT struct {
 	sv.UnimplementedBFFServer
-	pm pm.ProductManagerClient
-	tm tm.TransactionManagerClient
+	Pm pm.ProductManagerClient
+	Tm tm.TransactionManagerClient
 }
 
-func (s *serverT) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Empty, error) {
+func (s *ServerT) Import(ctx context.Context, req *sv.ImportRequest) (*emptypb.Empty, error) {
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	pmReq := convertImportSvToPM(req)
-	_, err = s.pm.Import(ctx, pmReq)
+	log.Infof("[Server] Import PM: %v", pmReq)
+	_, err = s.Pm.Import(ctx, pmReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
+		log.Errorf("[Server] Import PM: %v", err)
+		return nil, err
 	}
 
 	tmReq := convertImportSvToTM(req)
-	_, err = s.tm.Insert(ctx, tmReq)
+	log.Infof("[Server] Import TM: %v", tmReq)
+	_, err = s.Tm.Insert(ctx, tmReq)
+	if err != nil {
+		log.Errorf("[Server] Import TM: %v", err)
+		return nil, err
+	}
 
-	return &emptypb.Empty{}, err
+	return &emptypb.Empty{}, nil
 }
 
-func (s *serverT) Export(ctx context.Context, req *sv.ExportRequest) (response *sv.ExportResponse, errorResponse error) {
+func (s *ServerT) Export(ctx context.Context, req *sv.ExportRequest) (response *sv.ExportResponse, errorResponse error) {
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	pmReq := convertExportSvToPM(req)
-	pmRes, err := s.pm.Export(ctx, pmReq)
+	log.Infof("[Server] Export PM: %v", pmReq)
+	pmRes, err := s.Pm.Export(ctx, pmReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
+		log.Errorf("[Server] Export PM: %v", err)
+		return nil, err
 	}
 
 	tmReq := convertExportSvToTM(req)
-	_, err = s.tm.Insert(ctx, tmReq)
+	log.Infof("[Server] Export TM: %v", tmReq)
+	_, err = s.Tm.Insert(ctx, tmReq)
+	if err != nil {
+		log.Errorf("[Server] Export TM: %v", err)
+		return nil, err
+	}
 
 	svRes := convertExportPMToSv(pmRes)
-	return svRes, err
+	return svRes, nil
 }
 
-func (s *serverT) GetProduct(ctx context.Context, req *sv.GetProductRequest) (response *sv.GetProductResponse, errorResponse error) {
+func (s *ServerT) GetProduct(ctx context.Context, req *sv.GetProductRequest) (response *sv.GetProductResponse, errorResponse error) {
 	err := req.Validate()
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	pmReq := convertGetProductSvToPM(req)
-	pmRes, err := s.pm.GetProduct(ctx, pmReq)
+	log.Infof("[Server] GetProduct PM: %v", pmReq)
+	pmRes, err := s.Pm.GetProduct(ctx, pmReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
+		log.Errorf("[Server] GetProduct PM: %v", err)
+		return nil, err
 	}
 
 	svRes := convertGetProductPMToSv(pmRes)

@@ -1,12 +1,12 @@
 CREATE TABLE "User"
 (
-    "id"   integer PRIMARY KEY,
+    "id"   SERIAL PRIMARY KEY,
     "name" varchar UNIQUE NOT NULL
 );
 
 CREATE TABLE "Transaction"
 (
-    "id"         integer PRIMARY KEY,
+    "id"         SERIAL PRIMARY KEY,
     "action"     integer   NOT NULL,
     "date"       timestamp NOT NULL DEFAULT now(),
     "sku"        varchar   NOT NULL,

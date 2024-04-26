@@ -192,35 +192,6 @@ func (m *ImportRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if all {
-		switch v := interface{}(m.GetExpiredDate()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ImportRequestValidationError{
-					field:  "ExpiredDate",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ImportRequestValidationError{
-					field:  "ExpiredDate",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetExpiredDate()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ImportRequestValidationError{
-				field:  "ExpiredDate",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
 	// no validation rules for Category
 
 	if len(m.GetShelfQuantities()) < 1 {
@@ -829,35 +800,6 @@ func (m *GetProductResponse) validate(all bool) error {
 			}
 		}
 
-	}
-
-	if all {
-		switch v := interface{}(m.GetExpiredDate()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GetProductResponseValidationError{
-					field:  "ExpiredDate",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GetProductResponseValidationError{
-					field:  "ExpiredDate",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetExpiredDate()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetProductResponseValidationError{
-				field:  "ExpiredDate",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
 	}
 
 	// no validation rules for Category

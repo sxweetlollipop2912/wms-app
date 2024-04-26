@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/google/martian/log"
 	"github.com/jackc/pgx/v5/pgtype"
 	"simple_warehouse/transaction_manager/domain"
 	"simple_warehouse/transaction_manager/repository/store"
@@ -12,7 +13,7 @@ var (
 	ErrorAuthorIsNil = errors.New("author is nil")
 )
 
-func convertDbTransactionToDmTransaction(dbTransaction *store.Transaction) (*domain.Transaction, error) {
+func convertDbTransactionToDmTransaction(dbTransaction *store.Transaction) *domain.Transaction {
 	transaction := domain.Transaction{
 		Id:              int(dbTransaction.ID),
 		Action:          int(dbTransaction.Action),
@@ -24,11 +25,12 @@ func convertDbTransactionToDmTransaction(dbTransaction *store.Transaction) (*dom
 			Id: int(dbTransaction.AuthorID),
 		},
 	}
-	return &transaction, nil
+	return &transaction
 }
 
 func convertDmTransactionToDbTransaction(dmTransaction *domain.Transaction) (*store.Transaction, error) {
 	if dmTransaction.Author == nil {
+		log.Errorf("[Transaction Repo] convertDmTransactionToDbTransaction: %v", ErrorAuthorIsNil)
 		return nil, ErrorAuthorIsNil
 	}
 	return &store.Transaction{
@@ -42,16 +44,16 @@ func convertDmTransactionToDbTransaction(dmTransaction *domain.Transaction) (*st
 	}, nil
 }
 
-func convertDbUserToDmUser(dbUser *store.User) (*domain.User, error) {
+func convertDbUserToDmUser(dbUser *store.User) *domain.User {
 	return &domain.User{
 		Id:   int(dbUser.ID),
 		Name: dbUser.Name,
-	}, nil
+	}
 }
 
-func convertDmUserToDbUser(dmUser *domain.User) (*store.User, error) {
+func convertDmUserToDbUser(dmUser *domain.User) *store.User {
 	return &store.User{
 		ID:   int32(dmUser.Id),
 		Name: dmUser.Name,
-	}, nil
+	}
 }

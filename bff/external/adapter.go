@@ -11,7 +11,6 @@ func convertImportSvToPM(svReq *sv.ImportRequest) *pm.ImportRequest {
 	pmReq := &pm.ImportRequest{
 		Sku:             svReq.GetSku(),
 		Name:            svReq.GetName(),
-		ExpiredDate:     svReq.GetExpiredDate(),
 		Category:        svReq.GetCategory(),
 		ShelfQuantities: make([]*pm.ShelfQuantity, 0),
 	}
@@ -93,7 +92,6 @@ func convertGetProductPMToSv(pmProduct *pm.GetProductResponse) *sv.GetProductRes
 	svProduct := &sv.GetProductResponse{
 		Sku:             pmProduct.GetSku(),
 		Name:            pmProduct.GetName(),
-		ExpiredDate:     pmProduct.GetExpiredDate(),
 		Category:        pmProduct.GetCategory(),
 		ShelfQuantities: make([]*sv.ShelfQuantity, 0),
 	}

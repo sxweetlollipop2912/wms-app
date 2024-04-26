@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/jackc/pgx/v5/pgtype"
 	"simple_warehouse/product_manager/domain"
 	"simple_warehouse/product_manager/repository/store"
@@ -12,27 +11,25 @@ var (
 	ErrorProductIsNil = errors.New("product is nil")
 )
 
-func convertDbProductToDmProduct(dbProduct *store.Product) (*domain.Product, error) {
+func convertDbProductToDmProduct(dbProduct *store.Product) *domain.Product {
 	return &domain.Product{
-		Id:          int(dbProduct.ID),
-		Sku:         dbProduct.Sku,
-		Name:        dbProduct.Name,
-		ExpiredDate: timestamp.Timestamp{Seconds: dbProduct.ExpiredDate.Time.Unix()},
-		Category:    dbProduct.Category.String,
-	}, nil
+		Id:       int(dbProduct.ID),
+		Sku:      dbProduct.Sku,
+		Name:     dbProduct.Name,
+		Category: dbProduct.Category.String,
+	}
 }
 
-func convertDmProductToDbProduct(dmProduct *domain.Product) (*store.Product, error) {
+func convertDmProductToDbProduct(dmProduct *domain.Product) *store.Product {
 	return &store.Product{
-		ID:          int32(dmProduct.Id),
-		Sku:         dmProduct.Sku,
-		Name:        dmProduct.Name,
-		ExpiredDate: pgtype.Timestamp{Time: dmProduct.ExpiredDate.AsTime()},
-		Category:    pgtype.Text{String: dmProduct.Category},
-	}, nil
+		ID:       int32(dmProduct.Id),
+		Sku:      dmProduct.Sku,
+		Name:     dmProduct.Name,
+		Category: pgtype.Text{String: dmProduct.Category},
+	}
 }
 
-func convertDbShelfToDmShelf(dbShelf *store.Shelf) (*domain.Shelf, error) {
+func convertDbShelfToDmShelf(dbShelf *store.Shelf) *domain.Shelf {
 	return &domain.Shelf{
 		Id:   int(dbShelf.ID),
 		Name: dbShelf.Name,
@@ -40,7 +37,7 @@ func convertDbShelfToDmShelf(dbShelf *store.Shelf) (*domain.Shelf, error) {
 			Id: int(dbShelf.ProductID),
 		},
 		Quantity: int64(dbShelf.Quantity),
-	}, nil
+	}
 }
 
 func convertDmShelfToDbShelf(dmShelf *domain.Shelf) (*store.Shelf, error) {
